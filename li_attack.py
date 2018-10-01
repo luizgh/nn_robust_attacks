@@ -8,6 +8,7 @@
 import sys
 import tensorflow as tf
 import numpy as np
+import collections
 
 DECREASE_FACTOR = 0.9   # 0<f<1, rate at which we shrink tau; larger is more accurate
 MAX_ITERATIONS = 1000   # number of iterations to perform gradient descent
@@ -70,8 +71,17 @@ class CarliniLi:
                 return x == y
             else:
                 return x != y
-        shape = (1,model.image_size,model.image_size,model.num_channels)
-    
+
+        image_size = model.image_size
+        num_channels = model.num_channels
+        if  isinstance(image_size, collections.Sequence):
+            assert len(image_size) == 2
+            shape = (1,image_size[0],image_size[1],num_channels)
+        else:
+            shape = (1,image_size,image_size,num_channels)
+
+        self.shape=shape
+
         # the variable to optimize over
         modifier = tf.Variable(np.zeros(shape,dtype=np.float32))
 
@@ -164,7 +174,7 @@ class CarliniLi:
         """
 
         # the previous image
-        prev = np.copy(img).reshape((1,self.model.image_size,self.model.image_size,self.model.num_channels))
+        prev = np.copy(img).reshape(self.shape)
         tau = 1.0
         const = self.INITIAL_CONST
         

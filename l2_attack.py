@@ -8,6 +8,7 @@
 import sys
 import tensorflow as tf
 import numpy as np
+import collections
 
 BINARY_SEARCH_STEPS = 9  # number of times to adjust the constant with binary search
 MAX_ITERATIONS = 10000   # number of iterations to perform gradient descent
@@ -64,7 +65,12 @@ class CarliniL2:
 
         self.repeat = binary_search_steps >= 10
 
-        shape = (batch_size,image_size,image_size,num_channels)
+        if  isinstance(image_size, collections.Sequence):
+            assert len(image_size) == 2
+            shape = (batch_size,image_size[0],image_size[1],num_channels)
+        else:
+            shape = (batch_size,image_size,image_size,num_channels)
+
         
         # the variable we're going to optimize over
         modifier = tf.Variable(np.zeros(shape,dtype=np.float32))
